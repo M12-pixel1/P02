@@ -29,7 +29,7 @@ jobs:
 
       - name: Pytest acceptance
         run: |
-          pytest tests/test_validation_contract.py -v --tb=short
+          PYTHONPATH=. pytest tests/test_validation_contract.py -v --tb=short
 
       - name: Start server
         run: |
