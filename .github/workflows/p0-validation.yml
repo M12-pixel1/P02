@@ -29,7 +29,8 @@ jobs:
 
       - name: Pytest acceptance
         run: |
-          PYTHONPATH=. pytest tests/test_validation_contract.py -v --tb=short
+          export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+          python -m pytest tests/test_validation_contract.py -v --tb=short
 
       - name: Start server
         run: |
