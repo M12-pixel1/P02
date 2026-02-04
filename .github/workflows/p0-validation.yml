@@ -1,0 +1,53 @@
+name: P0 Validation Contract
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  p0:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Install python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install fastapi pydantic pytest uvicorn httpx
+
+      - name: Pytest acceptance
+        run: |
+          pytest tests/test_validation_contract.py -v --tb=short
+
+      - name: Start server
+        run: |
+          python -m uvicorn main:app --host 0.0.0.0 --port 8000 &
+          sleep 3
+
+      - name: Smoke
+        run: |
+          chmod +x scripts/smoke_test_validation_contract.sh
+          bash scripts/smoke_test_validation_contract.sh
+
+      - name: No 500 check
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" -X POST "http://localhost:8000/test"             -H "Content-Type: application/json" -d "invalid json")
+          echo "Invalid JSON status: $status"
+          if [ "$status" -ge 500 ]; then
+            echo "❌ Found 5xx"
+            exit 1
+          fi
+          pkill -f "uvicorn main:app" || true
+          echo "✅ No 5xx detected"
