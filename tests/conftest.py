@@ -1,3 +1,7 @@
+"""
+Pytest configuration file.
+Ensures the project root is in sys.path for proper module imports.
+"""
 import sys
 from pathlib import Path
 
