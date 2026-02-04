@@ -2,7 +2,7 @@ name: P0 Validation Contract
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, 'claude/**' ]
   pull_request:
     branches: [ main, master ]
 
@@ -29,7 +29,8 @@ jobs:
 
       - name: Pytest acceptance
         run: |
-          PYTHONPATH=. pytest tests/test_validation_contract.py -v --tb=short
+          export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+          python -m pytest tests/test_validation_contract.py -v --tb=short
 
       - name: Start server
         run: |
